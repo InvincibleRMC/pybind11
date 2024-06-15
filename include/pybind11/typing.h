@@ -94,6 +94,12 @@ class TypeVar : public object {
     PYBIND11_OBJECT_DEFAULT(TypeVar, object, PyObject_Type)
     using object::object;
 };
+
+template <class TypeVar<>... TypeVars>
+class Generic : public object {
+    PYBIND11_OBJECT_DEFAULT(TypeVar, object, PyObject_Type)
+    using object::object;
+};
 #endif
 
 PYBIND11_NAMESPACE_END(typing)
