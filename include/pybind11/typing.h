@@ -13,6 +13,7 @@
 #include "detail/common.h"
 #include "cast.h"
 #include "pytypes.h"
+#include <type_traits>
 
 PYBIND11_NAMESPACE_BEGIN(PYBIND11_NAMESPACE)
 PYBIND11_NAMESPACE_BEGIN(typing)
@@ -83,8 +84,8 @@ class Optional : public object {
 #if defined(__cpp_nontype_template_parameter_class)
 template <size_t N>
 struct StringLiteral {
-    constexpr StringLiteral(const char (&str)[N]) { std::copy_n(str, N, value); }
-    char value[N];
+    constexpr StringLiteral(const char (&str)[N]) { std::copy_n(str, N, name); }
+    char name[N];
 };
 
 // Example syntax for creating a TypeVar.
@@ -95,11 +96,20 @@ class TypeVar : public object {
     using object::object;
 };
 
-template <class TypeVar<>... TypeVars>
+// TODO make sure is a typing::TypeVar
+template <typename... TypeVars>
 class Generic : public object {
-    PYBIND11_OBJECT_DEFAULT(TypeVar, object, PyObject_Type)
+    PYBIND11_OBJECT_DEFAULT(Generic, object, PyObject_Type)
+
     using object::object;
 };
+
+
+typedef const typing::TypeVar<"T"> TypeVarT;
+typedef const typing::TypeVar<"V"> TypeVarV;
+typedef typing::Generic<TypeVarT> GenericT;
+typedef typing::Generic<TypeVarT, TypeVarV> GenericT_V;
+typedef typing::Generic<int, TypeVarT> G;
 #endif
 
 PYBIND11_NAMESPACE_END(typing)
@@ -180,7 +190,12 @@ struct handle_type_name<typing::Optional<T>> {
 #if defined(__cpp_nontype_template_parameter_class)
 template <typing::StringLiteral StrLit>
 struct handle_type_name<typing::TypeVar<StrLit>> {
-    static constexpr auto name = const_name(StrLit.value);
+    static constexpr auto name = const_name(StrLit.name);
+};
+
+template <class... TypeVars>
+struct handle_type_name<typing::Generic<TypeVars...>> {
+    static constexpr auto name = const_name("Generic[") + ::pybind11::detail::concat(make_caster<TypeVars>::name...) + const_name("]");
 };
 #endif
 

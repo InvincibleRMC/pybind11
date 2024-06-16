@@ -113,6 +113,26 @@ void m_defs(py::module_ &m) {
 namespace typevar {
 typedef py::typing::TypeVar<"T"> TypeVarT;
 typedef py::typing::TypeVar<"V"> TypeVarV;
+
+typedef py::typing::Generic<TypeVarT> GenericT;
+
+// struct HasObject {
+//     HasObject(py::object obj) : name(obj) { }
+//     void setObject(py::object obj_) { obj = obj_; }
+//     py::object  &getObject() const { return obj; }
+
+//     py::object obj;
+// };
+
+struct GenericObject : GenericT {
+    GenericObject(TypeVarT t) : t(t) { }
+    void setT(TypeVarT t_) { t = t_; }
+    TypeVarT  getT() { return t; }
+
+    TypeVarT t;
+};
+
+
 } // namespace typevar
 #endif
 
@@ -881,6 +901,7 @@ TEST_SUBMODULE(pytypes, m) {
           [](py::typing::Optional<int> &o) -> py::object { return o; });
 
 #if defined(__cpp_nontype_template_parameter_class)
+    m.attr("if_defined__cpp_nontype_template_parameter_class") = true;
     m.def("annotate_generic_containers",
           [](const py::typing::List<typevar::TypeVarT> &l) -> py::typing::List<typevar::TypeVarV> {
               return l;
@@ -889,7 +910,17 @@ TEST_SUBMODULE(pytypes, m) {
     m.def("annotate_listT_to_T",
           [](const py::typing::List<typevar::TypeVarT> &l) -> typevar::TypeVarT { return l[0]; });
     m.def("annotate_object_to_T", [](const py::object &o) -> typevar::TypeVarT { return o; });
-    m.attr("if_defined__cpp_nontype_template_parameter_class") = true;
+
+    py::class_<typevar::GenericObject>(m, "GenericObject")
+        .def(py::init<typevar::TypeVarT>())
+        // .def("setT", &typevar::GenericObject::setT)
+        // .def("getT", &typevar::GenericObject::getT)
+        ;
+
+    // py::class_<GenericObject>(m, "GenericObject")
+    //     .def(py::init<typevar::TypeVarT>())
+    //     .def("setT", &GenericObject::setT)
+    //     .def("getT", &GenericObject::getT);
 #else
     m.attr("if_defined__cpp_nontype_template_parameter_class") = false;
 #endif
