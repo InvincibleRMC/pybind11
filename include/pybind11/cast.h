@@ -1779,7 +1779,7 @@ PYBIND11_NAMESPACE_BEGIN(detail)
 
 // forward declaration (definition in pybind11.h)
 template <typename T>
-std::string generate_type_signature();
+PYBIND11_CONSTEVAL std::string generate_type_signature();
 
 // Declared in pytypes.h:
 template <typename T, enable_if_t<!is_pyobject<T>::value, int>>
