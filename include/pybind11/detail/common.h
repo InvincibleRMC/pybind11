@@ -103,6 +103,14 @@
 #    define PYBIND11_DTOR_CONSTEXPR
 #endif
 
+#if defined(__cpp_consteval)
+#    define PYBIND11_CONSTEVAL consteval
+#    define PYBIND11_CONSTEVAL_OR_CONSTEXPR consteval
+#else
+#    define PYBIND11_CONSTEVAL
+#    define PYBIND11_CONSTEVAL_OR_CONSTEXPR constexpr
+#endif
+
 // Compiler version assertions
 #if defined(__INTEL_COMPILER)
 #    if __INTEL_COMPILER < 1800

@@ -102,7 +102,7 @@ inline std::string replace_newlines_and_squash(const char *text) {
 }
 
 /* Generate a proper function signature */
-inline std::string generate_function_signature(const char *type_caster_name_field,
+PYBIND11_DTOR_CONSTEXPR inline std::string generate_function_signature(const char *type_caster_name_field,
                                                detail::function_record *func_rec,
                                                const std::type_info *const *types,
                                                size_t &type_index,
@@ -230,8 +230,8 @@ inline std::string generate_function_signature(const char *type_caster_name_fiel
 }
 
 template <typename T>
-inline std::string generate_type_signature() {
-    static constexpr auto caster_name_field = make_caster<T>::name;
+PYBIND11_CONSTEVAL inline std::string generate_type_signature() {
+    constexpr auto caster_name_field = make_caster<T>::name;
     PYBIND11_DESCR_CONSTEXPR auto descr_types = decltype(caster_name_field)::types();
     // Create a default function_record to ensure the function signature has the proper
     // configuration e.g. no_convert.
